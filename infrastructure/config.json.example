@@ -1,0 +1,16 @@
+{
+    "pherusa": {
+        "name": "",
+        "value": ""
+    },
+    "redmine": {
+        "name": "",
+        "value": ""
+    },
+    "chatwork": {
+        "token": ""
+    },
+    "serve": {
+        "port": "1308"
+    }
+}
