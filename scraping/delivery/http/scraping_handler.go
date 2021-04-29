@@ -40,7 +40,7 @@ func NewServe() *cli.Command {
 			e := echo.New()
 			s := &scrapingHandler{}
 			e.POST("/webhook", s.webhook)
-			e.Logger.Fatal(e.Start(":11308"))
+			e.Logger.Fatal(e.Start(":" + viper.GetString(`serve.port`)))
 			return nil
 		},
 	}
@@ -53,15 +53,18 @@ func (s *scrapingHandler) webhook(c echo.Context) error {
 	}
 	pherusa := regexp.MustCompile(`https://pherusa([-/\.\w\d])*`)
 	redmine := regexp.MustCompile(`https://dev.sun-asterisk([-/\.\w\d])*`)
-
+	url := ""
 	switch {
 	case pherusa.MatchString(p.WebhookEvent.Body):
-		url := pherusa.FindString(p.WebhookEvent.Body)
+		url = pherusa.FindString(p.WebhookEvent.Body)
 		s.usecase = usecase.NewPherusaUsecase(url)
 	case redmine.MatchString(p.WebhookEvent.Body):
-		url := redmine.FindString(p.WebhookEvent.Body)
+		url = redmine.FindString(p.WebhookEvent.Body)
 		s.usecase = usecase.NewRedmineUsecase(url)
 	default:
+		return nil
+	}
+	if url != "" {
 		return nil
 	}
 
@@ -99,7 +102,6 @@ func (s *scrapingHandler) reply(t entities.Ticket, p *params) error {
 	if err != nil {
 		log.Fatal(err)
 	}
-	viper.SetConfigFile(`infrastructure/config.json`)
 	req.Header.Add("X-ChatWorkToken", viper.GetString(`chatwork.token`))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 
