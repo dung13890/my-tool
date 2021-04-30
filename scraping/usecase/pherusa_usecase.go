@@ -29,12 +29,6 @@ func (p *pherusaUsecase) SetUp() (*colly.Collector, error) {
 	)
 	c.SetRequestTimeout(400 * time.Second)
 
-	// Read config from json config
-	viper.SetConfigFile(`infrastructure/config.json`)
-	if err := viper.ReadInConfig(); err != nil {
-		return nil, errors.New(fmt.Sprintf("Errors: not exists or is wrong json format", err))
-	}
-
 	cookies := []*http.Cookie{}
 	cookie := &http.Cookie{
 		Name:  viper.GetString(`pherusa.name`),
