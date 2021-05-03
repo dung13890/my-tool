@@ -68,7 +68,7 @@ func (p *pherusaUsecase) Scraping() (t entities.Ticket, err error) {
 		count := 0
 		bugs := []string{}
 		e.ForEach("table tr.issue", func(_ int, el *colly.HTMLElement) {
-			matched, _ := regexp.MatchString(`.*QA Bug.*`, el.ChildText("td.subject"))
+			matched, _ := regexp.MatchString(`^.*QA Bug.*$`, el.ChildText("td.subject"))
 			if matched {
 				count += 1
 				bugs = append(bugs, fmt.Sprintf("[%s] - %s", el.ChildText("td.status"), el.ChildText("td.subject")))
