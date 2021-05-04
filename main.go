@@ -2,8 +2,9 @@ package main
 
 import (
 	"github.com/dung13890/my-tool/config"
-	"github.com/dung13890/my-tool/scraping/delivery/cmd"
+	scrapingCmd "github.com/dung13890/my-tool/scraping/delivery/cmd"
 	"github.com/dung13890/my-tool/scraping/delivery/http"
+	trackingCmd "github.com/dung13890/my-tool/tracking/delivery/cmd"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"log"
@@ -18,7 +19,8 @@ func main() {
 	}
 	cli.AppHelpTemplate = config.AppHelpTemplate
 	cli.CommandHelpTemplate = config.CommandHelpTemplate
-	scraping := cmd.NewScraping()
+	scraping := scrapingCmd.NewScraping()
+	googleSheet := trackingCmd.NewGoogleSheet()
 	serve := http.NewServe()
 
 	app := &cli.App{
@@ -28,6 +30,7 @@ func main() {
 		EnableBashCompletion: true,
 		Commands: []*cli.Command{
 			scraping,
+			googleSheet,
 			serve,
 		},
 	}

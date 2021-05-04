@@ -1,10 +1,9 @@
-package usecase
+package repository
 
 import (
 	"errors"
 	"fmt"
-	"github.com/dung13890/my-tool/entities"
-	"github.com/dung13890/my-tool/scraping"
+	"github.com/dung13890/my-tool/domain"
 	"github.com/gocolly/colly"
 	"github.com/spf13/viper"
 	"net/http"
@@ -12,17 +11,17 @@ import (
 	"time"
 )
 
-type pherusaUsecase struct {
+type pherusaRepository struct {
 	url string
 }
 
-func NewPherusaUsecase(url string) scraping.Usecase {
-	return &pherusaUsecase{
+func NewPherusaRepository(url string) domain.TicketRepository {
+	return &pherusaRepository{
 		url: url,
 	}
 }
 
-func (p *pherusaUsecase) SetUp() (*colly.Collector, error) {
+func (p *pherusaRepository) SetUp() (*colly.Collector, error) {
 	// Instantiate default collector
 	c := colly.NewCollector(
 		colly.AllowedDomains("pherusa-redmine.sun-asterisk.vn"),
@@ -51,7 +50,7 @@ func (p *pherusaUsecase) SetUp() (*colly.Collector, error) {
 	return c, nil
 }
 
-func (p *pherusaUsecase) Scraping() (t entities.Ticket, err error) {
+func (p *pherusaRepository) Scraping() (t domain.Ticket, err error) {
 	t.Url = p.url
 	c, err := p.SetUp()
 	if err != nil {

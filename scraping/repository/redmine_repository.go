@@ -1,10 +1,9 @@
-package usecase
+package repository
 
 import (
 	"errors"
 	"fmt"
-	"github.com/dung13890/my-tool/entities"
-	"github.com/dung13890/my-tool/scraping"
+	"github.com/dung13890/my-tool/domain"
 	"github.com/gocolly/colly"
 	"github.com/spf13/viper"
 	"net/http"
@@ -12,17 +11,17 @@ import (
 	"time"
 )
 
-type redmineUsecase struct {
+type redmineRepository struct {
 	url string
 }
 
-func NewRedmineUsecase(url string) scraping.Usecase {
-	return &redmineUsecase{
+func NewRedmineRepository(url string) domain.TicketRepository {
+	return &redmineRepository{
 		url: url,
 	}
 }
 
-func (re *redmineUsecase) SetUp() (*colly.Collector, error) {
+func (re *redmineRepository) SetUp() (*colly.Collector, error) {
 	// Instantiate default collector
 	c := colly.NewCollector(
 		colly.AllowedDomains("dev.sun-asterisk.com"),
@@ -52,7 +51,7 @@ func (re *redmineUsecase) SetUp() (*colly.Collector, error) {
 
 }
 
-func (re *redmineUsecase) Scraping() (t entities.Ticket, err error) {
+func (re *redmineRepository) Scraping() (t domain.Ticket, err error) {
 	t.Url = re.url
 	c, err := re.SetUp()
 	if err != nil {
