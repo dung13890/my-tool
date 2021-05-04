@@ -3,19 +3,16 @@ package cmd
 import (
 	"fmt"
 	"github.com/briandowns/spinner"
-	"github.com/dung13890/my-tool/entities"
-	"github.com/dung13890/my-tool/scraping"
+	"github.com/dung13890/my-tool/domain"
 	"github.com/dung13890/my-tool/scraping/usecase"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
-	"regexp"
 	"strings"
 	"time"
 )
 
 type scrapingHandler struct {
-	usecase scraping.Usecase
-	url     string
+	usecase domain.TicketUsecase
 }
 
 func NewScraping() *cli.Command {
@@ -24,10 +21,11 @@ func NewScraping() *cli.Command {
 		Aliases: []string{"s"},
 		Usage:   "scraping site",
 		Action: func(ctx *cli.Context) error {
-			s := &scrapingHandler{}
 			if ctx.NArg() > 0 {
-				s.url = ctx.Args().Get(0)
-				s.setUp()
+				url := ctx.Args().Get(0)
+				s := &scrapingHandler{
+					usecase: usecase.NewScrapingUsecase(url),
+				}
 				s.exec()
 			}
 			return nil
@@ -54,22 +52,7 @@ func (s *scrapingHandler) exec() error {
 	return nil
 }
 
-func (s *scrapingHandler) setUp() error {
-	pherusa := regexp.MustCompile(`https://pherusa([-/\.\w\d])*`)
-	redmine := regexp.MustCompile(`https://dev.sun-asterisk([-/\.\w\d])*`)
-	switch {
-	case pherusa.MatchString(s.url):
-		s.usecase = usecase.NewPherusaUsecase(s.url)
-	case redmine.MatchString(s.url):
-		s.usecase = usecase.NewRedmineUsecase(s.url)
-	default:
-		return nil
-	}
-
-	return nil
-}
-
-func (s *scrapingHandler) printInfo(t entities.Ticket) error {
+func (s *scrapingHandler) printInfo(t domain.Ticket) error {
 	fmt.Printf(
 		"============Ticket===========\nLink:	%s\nTitle:	%s\nStatus:	%s\nBug:	%d\n=============================\n%s\n",
 		t.Url,

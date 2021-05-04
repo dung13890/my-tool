@@ -2,8 +2,7 @@ package http
 
 import (
 	"fmt"
-	"github.com/dung13890/my-tool/entities"
-	"github.com/dung13890/my-tool/scraping"
+	"github.com/dung13890/my-tool/domain"
 	"github.com/dung13890/my-tool/scraping/usecase"
 	"github.com/labstack/echo/v4"
 	"github.com/spf13/viper"
@@ -16,7 +15,7 @@ import (
 )
 
 type scrapingHandler struct {
-	usecase scraping.Usecase
+	usecase domain.TicketUsecase
 }
 
 type params struct {
@@ -51,20 +50,16 @@ func (s *scrapingHandler) webhook(c echo.Context) error {
 	if err := c.Bind(p); err != nil {
 		return err
 	}
-	pherusa := regexp.MustCompile(`https://pherusa([-/\.\w\d])*`)
-	redmine := regexp.MustCompile(`https://dev.sun-asterisk([-/\.\w\d])*`)
+	ticket := regexp.MustCompile(`https://pherusa([-/\.\w\d])*|https://dev.sun-asterisk([-/\.\w\d])*`)
 	url := ""
 	switch {
-	case pherusa.MatchString(p.WebhookEvent.Body):
-		url = pherusa.FindString(p.WebhookEvent.Body)
-		s.usecase = usecase.NewPherusaUsecase(url)
-	case redmine.MatchString(p.WebhookEvent.Body):
-		url = redmine.FindString(p.WebhookEvent.Body)
-		s.usecase = usecase.NewRedmineUsecase(url)
+	case ticket.MatchString(p.WebhookEvent.Body):
+		url = ticket.FindString(p.WebhookEvent.Body)
+		s.usecase = usecase.NewScrapingUsecase(url)
 	default:
 		return nil
 	}
-	if url != "" {
+	if url == "" {
 		return nil
 	}
 
@@ -78,7 +73,7 @@ func (s *scrapingHandler) webhook(c echo.Context) error {
 	return nil
 }
 
-func (s *scrapingHandler) reply(t entities.Ticket, p *params) error {
+func (s *scrapingHandler) reply(t domain.Ticket, p *params) error {
 	reply := fmt.Sprintf(
 		"[rp aid=%d to=%d-%s]",
 		p.WebhookEvent.FromAccountId,
