@@ -8,7 +8,15 @@
         "value": ""
     },
     "chatwork": {
-        "token": ""
+        "token": "",
+        "room": "",
+        "leader": "[To:xxxxx]"
+    },
+    "spreadsheet": {
+        "id": "",
+        "range": "T5!C3:G26",
+        "bug_range": "T5!G",
+        "bug_limit": 1
     },
     "serve": {
         "port": "1308"
