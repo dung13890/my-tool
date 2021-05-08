@@ -7,6 +7,7 @@ import (
 	"github.com/dung13890/my-tool/scraping/usecase"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
+	"log"
 	"strings"
 	"time"
 )
@@ -43,6 +44,7 @@ func (s *scrapingHandler) exec() error {
 	sp.Start()
 	t, err := s.usecase.Scraping()
 	if err != nil {
+		log.Fatal(err)
 		return err
 	}
 	sp.Stop()

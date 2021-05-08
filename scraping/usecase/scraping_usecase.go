@@ -14,11 +14,14 @@ func NewScrapingUsecase(url string) domain.TicketUsecase {
 	u := &scrapingUsecase{}
 	pherusa := regexp.MustCompile(`https://pherusa([-/\.\w\d])*`)
 	redmine := regexp.MustCompile(`https://dev.sun-asterisk([-/\.\w\d])*`)
+	backlog := regexp.MustCompile(`https://.*backlog([-/\.\w\d])*`)
 	switch {
 	case pherusa.MatchString(url):
 		u.repo = repository.NewPherusaRepository(url)
 	case redmine.MatchString(url):
 		u.repo = repository.NewRedmineRepository(url)
+	case backlog.MatchString(url):
+		u.repo = repository.NewBacklogRepository(url)
 	default:
 		return nil
 	}
