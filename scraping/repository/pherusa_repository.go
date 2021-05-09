@@ -69,8 +69,10 @@ func (p *pherusaRepository) Scraping() (t domain.Ticket, err error) {
 		e.ForEach("table tr.issue", func(_ int, el *colly.HTMLElement) {
 			matched, _ := regexp.MatchString(`^.*QA Bug.*$`, el.ChildText("td.subject"))
 			if matched {
-				count += 1
-				bugs = append(bugs, fmt.Sprintf("[%s] - %s", el.ChildText("td.status"), el.ChildText("td.subject")))
+				if el.ChildText("td.status") != "Reject" {
+					count += 1
+					bugs = append(bugs, fmt.Sprintf("[%s] - %s", el.ChildText("td.status"), el.ChildText("td.subject")))
+				}
 			}
 		})
 
