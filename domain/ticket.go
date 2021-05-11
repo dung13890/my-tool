@@ -6,11 +6,18 @@ import (
 
 // Entity
 type Ticket struct {
-	Url      string
-	Title    string
-	BugCount int
-	Bugs     []string
-	Status   string
+	Url              string
+	Name             string
+	Version          string
+	Title            string
+	EstimatedTime    int
+	ActualTime       int
+	BugCount         int
+	PercentCompleted int
+	Priority         string
+	Category         string
+	Bugs             []string
+	Status           string
 }
 
 // Usecase

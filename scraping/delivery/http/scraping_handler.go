@@ -39,6 +39,7 @@ func NewServe() *cli.Command {
 			e := echo.New()
 			s := &scrapingHandler{}
 			e.POST("/webhook", s.webhook)
+			e.POST("/tickets/info", s.ticketInfo)
 			e.Logger.Fatal(e.Start(":" + viper.GetString(`serve.port`)))
 			return nil
 		},
@@ -71,6 +72,54 @@ func (s *scrapingHandler) webhook(c echo.Context) error {
 	s.reply(t, p)
 
 	return nil
+}
+
+func (s *scrapingHandler) ticketInfo(c echo.Context) error {
+	p := &struct {
+		TicketUrl string `json:"ticket_url"`
+	}{}
+	if err := c.Bind(p); err != nil {
+		return err
+	}
+
+	ticket := regexp.MustCompile(`https://pherusa([-/\.\w\d])*|https://dev.sun-asterisk([-/\.\w\d])*|https://framgiabrg.backlog([-/\.\w\d])*`)
+	url := ""
+	switch {
+	case ticket.MatchString(p.TicketUrl):
+		url = ticket.FindString(p.TicketUrl)
+		s.usecase = usecase.NewScrapingUsecase(url)
+	default:
+		return nil
+	}
+	if url == "" {
+		return nil
+	}
+
+	t, err := s.usecase.Scraping()
+	if err != nil {
+		return err
+	}
+
+	rs := &struct {
+		Name          string `json:"name"`
+		Title         string `json:"title"`
+		TargetVersion string `json:"target_version"`
+		Url           string `json:"url"`
+		Status        string `json:"status"`
+		EstimatedTime int    `json:"estimated_time"`
+		ActualTime    int    `json:"actual_time"`
+		Priority      string `json:"priority"`
+	}{
+		Name:          t.Title,
+		Title:         t.Title,
+		TargetVersion: t.Version,
+		Url:           t.Url,
+		Status:        t.Status,
+		EstimatedTime: t.EstimatedTime,
+		ActualTime:    t.ActualTime,
+		Priority:      t.Priority,
+	}
+	return c.JSON(http.StatusOK, rs)
 }
 
 func (s *scrapingHandler) reply(t domain.Ticket, p *params) error {
