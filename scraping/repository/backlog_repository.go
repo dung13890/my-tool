@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/viper"
 	"net/http"
 	_ "regexp"
+	"strconv"
 	"time"
 )
 
@@ -63,7 +64,34 @@ func (b *backlogRepository) Scraping() (t domain.Ticket, err error) {
 	c.OnHTML(".content-main .ticket__header", func(e *colly.HTMLElement) {
 		t.Status = e.ChildText("span.status-label")
 	})
+	c.OnHTML(".content-main .ticket__properties", func(e *colly.HTMLElement) {
+		e.ForEach(".ticket__properties-item", func(_ int, el *colly.HTMLElement) {
+			// Fetch priority
+			if el.Attr("class") == "ticket__properties-item -priority" {
+				t.Priority = el.ChildText(".ticket__properties-value")
+			}
 
+			// Fetch category
+			if el.Attr("class") == "ticket__properties-item -category" {
+				t.Category = el.ChildText(".ticket__properties-value")
+			}
+
+			// Fetch version
+			if el.Attr("class") == "ticket__properties-item -milestones" {
+				t.Version = el.ChildText(".ticket__properties-value")
+			}
+
+			// Fetch EST
+			if el.Attr("class") == "ticket__properties-item -estimated-hours" {
+				t.EstimatedTime, _ = strconv.Atoi(el.ChildText(".ticket__properties-value"))
+			}
+
+			// Fetch AcT
+			if el.Attr("class") == "ticket__properties-item -actual-hours" {
+				t.ActualTime, _ = strconv.Atoi(el.ChildText(".ticket__properties-value"))
+			}
+		})
+	})
 	// Start scraping on url
 	c.Visit(b.url)
 
